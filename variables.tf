@@ -2,24 +2,20 @@ variable "env_name" {
     type = string
 }
 
-variable "env_type" {
-  type = string
+variable "app_name" {
+    type = string
 }
 
-variable "pipeline_type" {
-  type = string
+variable "env_type" {
+    type = string
 }
 
 variable "from_env" {
     type = string
 }
 
-variable "app_name" {
+variable "source_repository" {
     type = string
-}
-
-variable "aws_profile" {
-  type = string
 }
 
 variable "trigger_branch" {
@@ -49,7 +45,47 @@ variable "solution_file_path" {
     type = string
 }
 
-variable "enable_coralogix_subscription" {
-    type = bool
-    default = false
+variable "aws_profile" {
+  type = string
+}
+
+variable "codedeploy_role" {
+  type = string
+}
+
+variable "pipeline_type" {
+  type = string
+  default = "dev"
+}
+
+variable "parameter_overrides" {
+  type = string
+  default = "{\"Stage\":\"v1\"}"
+}
+
+variable "run_integration_tests" {
+  type = bool
+  default = false
+}
+
+variable "run_stress_tests" {
+  type = bool
+  default = false
+}
+
+variable "enable_jira_automation" {
+  type = bool
+  default = false
+}
+
+variable "is_managed_env" {
+  type = bool
+  default = false
+}
+
+
+variable "stack_parameters" {
+ type = map(string)
+ default = {
+ }
 }
