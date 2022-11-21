@@ -20,7 +20,7 @@ module "code-pipeline" {
   run_stress_tests         = var.run_stress_tests
   run_integration_tests    = var.run_integration_tests
   template_file            = "../../${var.template_file_path}/template.yaml"
-  template_path            = "${var.template_file_path}"
+  template_path            = var.template_file_path
   stack_parameters         = var.stack_parameters
 }
 
@@ -36,8 +36,8 @@ module "build-code-build" {
   enable_jira_automation                = var.enable_jira_automation
   buildspec_file = templatefile("buildspec-build.yml.tpl",
     { APP_NAME           = var.app_name,
-      ENV                = var.env_name, 
-      ENV_NAME           = split("-",var.env_name)[0],
+      ENV                = var.env_name,
+      ENV_NAME           = split("-", var.env_name)[0],
       AWS_PROFILE        = var.aws_profile,
       FROM_ENV           = var.from_env,
       RUNTIME_TYPE       = var.runtime_type,
@@ -47,7 +47,9 @@ module "build-code-build" {
       ADO_USER           = data.aws_ssm_parameter.ado_user.value,
       ADO_PASSWORD       = data.aws_ssm_parameter.ado_password.value,
       SLN_PATH           = var.solution_file_path,
-      PIPELINE_TYPE      = var.pipeline_type
+      PIPELINE_TYPE      = var.pipeline_type,
+      SQ_ENABLED         = var.pipeline_type == "ci" && var.sq_enabled ? "true" : "false",
+      SQ_VERSION         = var.sq_version
   })
 }
 
