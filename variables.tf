@@ -99,3 +99,8 @@ variable "stack_parameters" {
    type = string
    default = "4.7.0.2747"
  }
+
+ variable "vpc_config" {
+  type = map(string)
+  default = {}
+}

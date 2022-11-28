@@ -56,3 +56,8 @@ variable "enable_jira_automation" {
   type = bool
   default = false
 }
+
+variable "vpc_config" {
+  type = map(string)
+  default = {}
+}
