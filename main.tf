@@ -28,6 +28,7 @@ module "build-code-build" {
   source                                = "./modules/codebuild"
   codebuild_name                        = "sam-build-${var.app_name}"
   env_name                              = var.env_name
+  app_name                              = var.app_name
   s3_bucket                             = data.aws_s3_bucket.codepipeline_bucket.bucket
   privileged_mode                       = true
   environment_variables_parameter_store = {}
@@ -58,6 +59,7 @@ module "build-post-build" {
   source                                = "./modules/codebuild"
   env_name                              = var.env_name
   codebuild_name                        = "post-sam-build-${var.app_name}"
+  app_name                              = var.app_name
   s3_bucket                             = "s3-codepipeline-${var.app_name}-${var.env_type}"
   privileged_mode                       = true
   environment_variables_parameter_store = {}

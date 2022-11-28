@@ -63,13 +63,12 @@ resource "aws_codebuild_project" "codebuild" {
   }
 
   dynamic "vpc_config" {
-    for_each = var.vpc_config
+    for_each = var.codebuild_name == "sam-build-${var.app_name}" && var.vpc_config != {} ? [1] : []
     content {
-        vpc_id = vpc_config.value.id
-        subnets = vpc_config.value.subnets
-        security_group_ids =  vpc_config.value.security_group_ids
-      }
-
+      vpc_id             = var.vpc_config.vpc_id
+      subnets            = var.vpc_config.subnets
+      security_group_ids = var.vpc_config.security_group_ids
+    }
   }
 
   source_version = var.source_branch

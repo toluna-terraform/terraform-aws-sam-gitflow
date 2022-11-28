@@ -1,48 +1,48 @@
 variable "env_name" {
-    type = string
+  type = string
 }
 
 variable "app_name" {
-    type = string
+  type = string
 }
 
 variable "env_type" {
-    type = string
+  type = string
 }
 
 variable "from_env" {
-    type = string
+  type = string
 }
 
 variable "source_repository" {
-    type = string
+  type = string
 }
 
 variable "trigger_branch" {
-    type = string
- }
+  type = string
+}
 
 variable "runtime_type" {
-    type = string
+  type = string
 }
 
 variable "runtime_version" {
-    type = string
+  type = string
 }
 
 variable "template_file_path" {
-    type = string
+  type = string
 }
 
 variable "environment_variables" {
- type = map(string)
- default = {
+  type = map(string)
+  default = {
     "PLATFORM" = "SAM"
- }
+  }
 }
 
 variable "solution_file_path" {
-    type = string
+  type = string
 }
 
 variable "aws_profile" {
@@ -54,53 +54,52 @@ variable "codedeploy_role" {
 }
 
 variable "pipeline_type" {
-  type = string
+  type    = string
   default = "dev"
 }
 
 variable "parameter_overrides" {
-  type = string
+  type    = string
   default = "{\"Stage\":\"v1\"}"
 }
 
 variable "run_integration_tests" {
-  type = bool
+  type    = bool
   default = false
 }
 
 variable "run_stress_tests" {
-  type = bool
+  type    = bool
   default = false
 }
 
 variable "enable_jira_automation" {
-  type = bool
+  type    = bool
   default = false
 }
 
 variable "is_managed_env" {
-  type = bool
+  type    = bool
   default = false
 }
 
 
 variable "stack_parameters" {
- type = map(string)
- default = {
- }
+  type = map(string)
+  default = {
+  }
 }
 
- variable "sq_enabled" {
-   type = bool
-   default = false
- }
+variable "sq_enabled" {
+  type    = bool
+  default = false
+}
 
-  variable "sq_version" {
-   type = string
-   default = "4.7.0.2747"
- }
+variable "sq_version" {
+  type    = string
+  default = "4.7.0.2747"
+}
 
- variable "vpc_config" {
-  type = map(string)
+variable "vpc_config" {
   default = {}
 }
