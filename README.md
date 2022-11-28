@@ -21,13 +21,39 @@ Before you start using this module, please validate you already have:
 module "sam-pipeline" {
   source              = "toluna-terraform/sam-pipeline/aws"
   version             = "~>0.0.2" // Change to the required version.
-  env_name            = local.environment
-  source_repository   = "tolunaengineering/responses" // ORG_NAME/REPO_NAME
-  trigger_branch      = local.env_vars.pipeline_branch // The branch that will trigger this pipeline.
-  runtime_type        = "dotnet" // https://docs.aws.amazon.com/codebuild/latest/userguide/runtime-versions.html
-  runtime_version     = "3.1" // https://docs.aws.amazon.com/codebuild/latest/userguide/runtime-versions.html
-  template_file_path  = "service/ResponsesService" // The path of the SAM template folder.
-}
+  env_name              = local.environment
+  env_type              = local.env_vars.env_type
+  pipeline_type         = local.env_vars.pipeline_type
+  from_env              = local.env_vars.from_env
+  run_stress_tests      = try (local.env_vars.run_stress_tests,false)
+  run_integration_tests = try(local.env_vars.run_integration_tests,false)
+  app_name              = local.app_name
+  aws_profile           = local.aws_profile
+  codedeploy_role       = aws_iam_role.codedeploy_role.arn
+  source_repository     = "orgname/appname"     // ORG_NAME/REPO_NAME
+  trigger_branch        = local.env_vars.pipeline_branch // The branch that will trigger this pipeline.
+  runtime_type          = "nodejs"                       // https://docs.aws.amazon.com/codebuild/latest/userguide/runtime-versions.html
+  runtime_version       = "16"                           // https://docs.aws.amazon.com/codebuild/latest/userguide/runtime-versions.html
+  template_file_path    = "service/appname"               // The path of the SAM template folder.
+  solution_file_path    = "service/"
+  parameter_overrides   = "{\"SecurityGroups\":\"/infra/butter-${local.environment}/vpce_security_groups\",\"Subnets\":\"/infra/butter-${local.environment}/private_subnets_ids\",\"Envname\":\"${local.environment}\",\"Stage\":\"${local.env_name}\",\"DeployRole\":\"${aws_iam_role.codedeploy_role.arn}\",\"RunIntegrationTests\":\"${local.env_vars.run_integration_tests}\",\"PipelineType\":\"${local.env_vars.pipeline_type}\"}"
+  stack_parameters = {
+    SecurityGroups = "/infra/appname-${local.environment}/vpce_security_groups",
+    Subnets = "/infra/appname-${local.environment}/private_subnets_ids",
+    Envname = "${local.environment}",
+    Stage = "${local.env_name}",
+    DeployRole = "${aws_iam_role.codedeploy_role.arn}",
+    RunIntegrationTests = "${local.env_vars.run_integration_tests}",
+    PipelineType ="${local.env_vars.pipeline_type}"
+  }
+  vpc_config = {
+    vpc_id = module.aws_vpc.attributes.vpc_id,
+    subnets = module.aws_vpc.attributes.private_subnets,
+    security_group_ids = [aws_security_group.alb_sg.id]
+  }
+  depends_on = [
+    module.aws_vpc
+  ]
 ```
 
 ### Samconfig template (samconfig.toml.j2)
