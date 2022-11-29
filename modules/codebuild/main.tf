@@ -63,7 +63,7 @@ resource "aws_codebuild_project" "codebuild" {
   }
 
   dynamic "vpc_config" {
-    for_each = var.codebuild_name == "sam-build-${var.app_name}" && var.vpc_config != {} ? [1] : []
+    for_each = var.vpc_config != {} ? [1] : []
     content {
       vpc_id             = var.vpc_config.vpc_id
       subnets            = var.vpc_config.subnets

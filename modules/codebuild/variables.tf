@@ -2,10 +2,6 @@ variable "env_name" {
   type = string
 }
 
-variable "app_name" {
-  type = string
-}
-
 variable "codebuild_name" {
   type = string
 
