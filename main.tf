@@ -34,6 +34,7 @@ module "build-code-build" {
   codedeploy_role                       = var.codedeploy_role
   environment_variables                 = merge(var.environment_variables, { APPSPEC = "" })
   enable_jira_automation                = var.enable_jira_automation
+  vpc_config                            = var.vpc_config
   buildspec_file = templatefile("buildspec-build.yml.tpl",
     { APP_NAME           = var.app_name,
       ENV                = var.env_name,

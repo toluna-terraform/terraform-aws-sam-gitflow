@@ -2,15 +2,15 @@ variable "env_name" {
     type = string
 }
 
+variable "app_name" {
+  type = string
+}
+
 variable "env_type" {
     type = string
 }
 
 variable "source_repository" {
-    type = string
-}
-
-variable "app_name" {
     type = string
 }
 
@@ -57,7 +57,5 @@ variable "template_path" {
 }
 
 variable "stack_parameters" {
- type = map(string)
- default = {
- }
+ default = {}
 }
