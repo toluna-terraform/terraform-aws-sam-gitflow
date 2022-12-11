@@ -61,7 +61,7 @@ resource "aws_codepipeline" "codepipeline" {
       run_order       = 1
       configuration = {
         ActionMode     = "REPLACE_ON_FAILURE"
-        Capabilities   = "CAPABILITY_AUTO_EXPAND,CAPABILITY_IAM"
+        Capabilities   = "CAPABILITY_AUTO_EXPAND,CAPABILITY_IAM,CAPABILITY_NAMED_IAM"
         OutputFileName = "CreateStackOutput.json"
         StackName      = "serverlessrepo-${var.app_name}-${var.env_name}"
         TemplatePath       = "build_output::${var.template_path}/sam-${split("-",var.env_name)[0]}-templated.yaml"
@@ -122,7 +122,7 @@ resource "null_resource" "create_package" {
 resource "aws_cloudformation_stack" "initial" {
   name          = "serverlessrepo-${var.app_name}-${var.env_name}"
   iam_role_arn = aws_iam_role.codepipeline_role.arn
-  capabilities = ["CAPABILITY_AUTO_EXPAND","CAPABILITY_IAM"]
+  capabilities = ["CAPABILITY_AUTO_EXPAND","CAPABILITY_IAM","CAPABILITY_NAMED_IAM"]
   parameters = var.stack_parameters
   template_body = file("${path.module}/templates/package.yaml")
   depends_on = [
