@@ -56,7 +56,8 @@ data "aws_iam_policy_document" "codepipeline_role_policy" {
       "codebuild:*",
       "serverlessrepo:*",
       "sqs:*",
-      "route53:*"
+      "route53:*",
+      "events:*"
     ]
     resources = ["*"]
   }
