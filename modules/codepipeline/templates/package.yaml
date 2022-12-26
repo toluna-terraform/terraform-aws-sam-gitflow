@@ -1,0 +1,160 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: "Simon\n"
+Parameters:
+  Stage:
+    Type: String
+    Description: Stage in API gateway, e.g., dev, test, prod.
+    Default: devops
+  Envname:
+    Type: String
+    Description: Stage in API gateway, e.g., dev, test, prod.
+    Default: devops
+  Version:
+    Type: String
+    Default: v1
+  CommitNumber:
+    Type: String
+    Default: '0'
+  Subnets:
+    Type: AWS::SSM::Parameter::Value<CommaDelimitedList>
+    Description: This param is overrided by Samconfig.toml file.
+  SecurityGroups:
+    Type: AWS::SSM::Parameter::Value<CommaDelimitedList>
+    Description: This param is overrided by Samconfig.toml file.
+  SemanticVersion:
+    Type: String
+    Default: 0.0.1
+  DeployRole:
+    Type: String
+  RunIntegrationTests:
+    Type: String
+    Default: false
+  PipelineType:
+    Type: String
+    Default: dev
+Globals:
+  Function:
+    CodeUri: ./
+    Runtime: dotnet6
+    MemorySize: 128
+    Timeout: 20
+    Tracing: Active
+    VpcConfig:
+      SecurityGroupIds:
+        Ref: SecurityGroups
+      SubnetIds:
+        Ref: Subnets
+    Environment:
+      Variables:
+        STAGE:
+          Ref: Stage
+        ASPNETCORE_ENVIRONMENT:
+          Ref: Stage
+        Version:
+          Ref: Version
+        CommitNumber:
+          Ref: CommitNumber
+        DD_ENV:
+          Ref: Stage
+        DD_SERVICE: Simon
+        DD_VERSION:
+          Fn::Sub: ${Version}-${CommitNumber}
+    Tags:
+      env:
+        Ref: Stage
+      service: Simon
+      version:
+        Fn::Sub: ${Version}-${CommitNumber}
+Resources:
+  AccessLogs:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName:
+        Fn::Sub: /api/Simon/access-logs-${Stage}
+      RetentionInDays: 7
+  SurveyValidationFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: Simon::Simon.Functions.SurveyValidationFunction::Handler
+      Timeout: 120
+      Events:
+        RateEvent:
+          Type: Schedule
+          Properties:
+            Schedule: rate(5 minutes)
+            Name: RateScheduleValidateSurveys
+            Description: Trigger Lambda every N minutes
+      EventInvokeConfig:
+        MaximumEventAgeInSeconds: 900
+        MaximumRetryAttempts: 0
+      CodeUri: s3://s3-codepipeline-simon-non-prod/18a2d22bd23bf70e01f3359b963d9275
+  MemberActivityFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: Simon::Simon.Functions.MemberActivityFunction::Handler
+      Events:
+        MemberActivitySQSEvent:
+          Type: SQS
+          Properties:
+            Queue:
+              Fn::GetAtt:
+              - MemberActivityQueue
+              - Arn
+            BatchSize: 100
+            MaximumBatchingWindowInSeconds: 10
+      CodeUri: s3://s3-codepipeline-simon-non-prod/18a2d22bd23bf70e01f3359b963d9275
+  MemberActivityQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName:
+        Fn::Sub: member-activity-queue-${Stage}
+      VisibilityTimeout: 130
+      SqsManagedSseEnabled: false
+      RedrivePolicy:
+        deadLetterTargetArn:
+          Fn::GetAtt:
+          - MemberActivityDlQueue
+          - Arn
+        maxReceiveCount: 3
+  MemberActivityDlQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      MessageRetentionPeriod: 1209600
+      QueueName:
+        Fn::Sub: member-activity-dl-queue-${Stage}
+      SqsManagedSseEnabled: false
+  SurveyActivityFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: Simon::Simon.Functions.SurveyActivityFunction::Handler
+      Events:
+        SurveyActivitySQSEvent:
+          Type: SQS
+          Properties:
+            Queue:
+              Fn::GetAtt:
+              - SurveyActivityQueue
+              - Arn
+            BatchSize: 1
+      CodeUri: s3://s3-codepipeline-simon-non-prod/18a2d22bd23bf70e01f3359b963d9275
+  SurveyActivityQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName:
+        Fn::Sub: survey-activity-queue-${Stage}
+      VisibilityTimeout: 130
+      SqsManagedSseEnabled: false
+      RedrivePolicy:
+        deadLetterTargetArn:
+          Fn::GetAtt:
+          - SurveyActivityDlQueue
+          - Arn
+        maxReceiveCount: 3
+  SurveyActivityDlQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      MessageRetentionPeriod: 1209600
+      QueueName:
+        Fn::Sub: survey-activity-dl-queue-${Stage}
+      SqsManagedSseEnabled: false
